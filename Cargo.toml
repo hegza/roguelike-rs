@@ -1,0 +1,8 @@
+[package]
+name = "rpg-rs"
+version = "0.1.0"
+authors = ["Henri Lunnikivi <henri.lunnikivi@gmail.com>"]
+
+[dependencies]
+rpglib = { path = "../rpglib" }
+tui = "*"
