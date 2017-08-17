@@ -53,9 +53,15 @@ impl Game {
             implicit_effects: vec![],
             size: 2,
         };
+        let item_4 = Consumable {
+            effects: vec![],
+            english_name: "Food ration".to_owned(),
+            size: 1,
+        };
         my_character.inventory.put(item_1.into());
         my_character.inventory.put(item_2.into());
         my_character.inventory.put(item_3.into());
+        my_character.inventory.put(item_4.into());
 
         Game {
             last_key: ' ',
@@ -106,8 +112,9 @@ impl Game {
                         self.character.equipped_items().iter().map(|(k, _)| k).collect();
                     all_slots.sort();
 
-                    let cur_idx =
-                        all_slots.iter().position(|x| *x == &self.controller.equipment).unwrap();
+                    let cur_idx = all_slots.iter()
+                        .position(|x| *x == &self.controller.equipment)
+                        .expect("a non-existing slot should not be selected");
                     if dir == UIDirection::Down {
                         if cur_idx != all_slots.len() - 1 {
                             self.controller.equipment = *all_slots[cur_idx + 1];
@@ -124,16 +131,19 @@ impl Game {
                 if self.controller.focus == self.character.inventory.id() {
                     let idx = &mut self.controller.inventory;
                     let character = &mut self.character;
-                    if let Some(stored_item) = character.inventory.take(*idx as i32) {
-                        match stored_item {
-                            Item::Equipment(item) => {
-                                // Equip item from inventory
-                                if let Some(prev) = character.equip(item) {
+                    if let Some(item) = character.inventory.take(*idx as i32) {
+                        match item {
+                            Item::Equipment(equip) => {
+                                // Equip the item, take previous item out
+                                if let Some(prev) = character.equip(equip) {
                                     // Put the previous item back in inventory
                                     character.inventory.put(prev.into());
                                 }
                             }
-                            _ => {}
+                            _ => {
+                                // Put the item back into the inventory
+                                character.inventory.put(item);
+                            }
                         }
                     };
                 }
@@ -161,11 +171,19 @@ impl Game {
 
     pub fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect) {
         Group::default()
-            .direction(Direction::Horizontal)
             .margin(0)
+        // Split in two horizontally
+            .direction(Direction::Horizontal)
             .sizes(&[Size::Percent(50), Size::Percent(50)])
             .render(t, &area, |t, chunks| {
-                self.character.render(t, &chunks[0], &self.controller);
+                Group::default()
+                    .margin(0)
+        // Split in two vertically
+                    .direction(Direction::Vertical)
+                    .sizes(&[Size::Percent(50), Size::Percent(50)])
+                    .render(t, &chunks[0], |t, chunks| {
+                        self.character.render(t, &chunks[0], &self.controller);
+                    });
                 self.character.inventory.render(t, &chunks[1], &self.controller);
             });
     }
