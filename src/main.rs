@@ -3,6 +3,7 @@ extern crate tui;
 
 mod game;
 mod render;
+mod ui;
 
 use game::*;
 use tui::Terminal;
