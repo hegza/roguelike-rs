@@ -16,7 +16,8 @@ pub struct Controller {
     pub inventory: usize,
     pub equipment: ItemSlot,
     pub focus: usize, // Id of view
-                      // TODO: focus() -> &View
+    // TODO: focus() -> &View
+    max_views: usize,
 }
 
 impl Controller {
@@ -25,6 +26,7 @@ impl Controller {
             inventory: 0,
             equipment: ItemSlot::MainHand,
             focus: 0,
+            max_views: 2,
         }
     }
 }
@@ -68,10 +70,11 @@ impl Game {
             Command::Nav(dir) => {
                 match dir {
                     UIDirection::Right => {
-                        self.controller.focus += 1;
+                        if self.controller.focus != self.controller.max_views - 1 {
+                            self.controller.focus += 1;
+                        }
                     }
                     UIDirection::Left => {
-                        // TODO: check upper bound
                         if self.controller.focus > 0 {
                             self.controller.focus -= 1;
                         }
