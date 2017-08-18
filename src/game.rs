@@ -5,11 +5,16 @@ use tui::backend::TermionBackend;
 use tui::layout::*;
 use super::ui::{Command, View};
 use super::ui::Direction as UIDirection;
+use super::render::game_info::*;
+use super::render::inventory::*;
+use super::render::character::*;
+use render::game_info::GameInfo;
 
 pub struct Game {
     pub last_key: char,
     character: Character,
     pub controller: Controller,
+    ticks: usize,
 }
 
 pub struct Controller {
@@ -18,6 +23,15 @@ pub struct Controller {
     pub focus: usize, // Id of view
     // TODO: focus() -> &View
     max_views: usize,
+}
+
+enum StateChange {
+    // Game should advance by one round
+    Advance,
+    // Game state should not change
+    Still,
+    // Exit game
+    Quit,
 }
 
 impl Controller {
@@ -67,12 +81,13 @@ impl Game {
             last_key: ' ',
             character: my_character,
             controller: Controller::new(),
+            ticks: 0,
         }
     }
 
-    fn handle_command(&mut self, cmd: Command) -> bool {
+    fn handle_command(&mut self, cmd: Command) -> StateChange {
         match cmd {
-            Command::Quit => false,
+            Command::Quit => StateChange::Quit,
             Command::Nav(dir) => {
                 match dir {
                     UIDirection::Right => {
@@ -87,7 +102,7 @@ impl Game {
                     }
                     _ => {}
                 }
-                true
+                StateChange::Still
             }
             Command::MoveSelect(dir) => {
                 if self.controller.focus == self.character.inventory.id() {
@@ -125,7 +140,7 @@ impl Game {
                         }
                     }
                 }
-                true
+                StateChange::Still
             }
             Command::Confirm => {
                 if self.controller.focus == self.character.inventory.id() {
@@ -142,7 +157,7 @@ impl Game {
                             }
                             _ => {
                                 // Put the item back into the inventory
-                                character.inventory.put(item);
+                                character.inventory.put_at(item, *idx);
                             }
                         }
                     };
@@ -155,36 +170,58 @@ impl Game {
                     };
                 }
 
-                true
+                StateChange::Still
             }
-            Command::Unknown => true,
+            Command::Unknown => StateChange::Still,
         }
     }
 
     /// Returns true while the game is running
     pub fn input(&mut self, key: char) -> bool {
         let command: Command = key.into();
-        let ret = self.handle_command(command);
+        let state_change = self.handle_command(command);
         self.last_key = key;
-        ret
+        match state_change {
+            StateChange::Quit => false,
+            StateChange::Still => true,
+            StateChange::Advance => {
+                self.advance();
+                true
+            }
+        }
+    }
+
+    fn advance(&mut self) {
+        self.ticks += 1;
     }
 
     pub fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect) {
+        // Create game info view
+        let game_info = GameInfo::new(&self.ticks);
+
+        // Split the view in two horizontally
         Group::default()
             .margin(0)
-        // Split in two horizontally
             .direction(Direction::Horizontal)
             .sizes(&[Size::Percent(50), Size::Percent(50)])
             .render(t, &area, |t, chunks| {
+                // Split the left view in two vertically
                 Group::default()
                     .margin(0)
-        // Split in two vertically
                     .direction(Direction::Vertical)
                     .sizes(&[Size::Percent(50), Size::Percent(50)])
-                    .render(t, &chunks[0], |t, chunks| {
-                        self.character.render(t, &chunks[0], &self.controller);
+                    .render(t, &chunks[0], |_, _| {});
+                // Split the right view in three vertically
+                Group::default()
+                    .margin(0)
+                    .direction(Direction::Vertical)
+                    .sizes(&[Size::Percent(50), Size::Percent(25), Size::Percent(25)])
+                    .render(t, &chunks[1], |t, chunks| {
+                        self.character.inventory.render(t, &chunks[0], &self.controller);
+                        self.character.render(t, &chunks[1], &self.controller);
+                        game_info.render(t, &chunks[2], &self.controller);
                     });
-                self.character.inventory.render(t, &chunks[1], &self.controller);
+
             });
     }
 }
