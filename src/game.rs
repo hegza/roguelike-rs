@@ -3,16 +3,14 @@ use super::render::*;
 use tui::Terminal;
 use tui::backend::TermionBackend;
 use tui::layout::*;
-use super::ui::{Command, View};
-use super::ui::Direction as UIDirection;
-use super::render::game_info::*;
-use super::render::inventory::*;
-use super::render::character::*;
+use super::ui::{Command, View, Direction as UIDirection};
 use render::game_info::GameInfo;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct Game {
     pub last_key: char,
-    character: Character,
+    character: Rc<RefCell<Character>>,
     pub controller: Controller,
     ticks: usize,
 }
@@ -79,7 +77,7 @@ impl Game {
 
         Game {
             last_key: ' ',
-            character: my_character,
+            character: Rc::new(RefCell::new(my_character)),
             controller: Controller::new(),
             ticks: 0,
         }
@@ -105,10 +103,10 @@ impl Game {
                 StateChange::Still
             }
             Command::MoveSelect(dir) => {
-                if self.controller.focus == self.character.inventory.id() {
+                if self.controller.focus == self.character.borrow().inventory.id() {
                     let idx = &mut self.controller.inventory;
                     if dir == UIDirection::Down {
-                        let inventory = &self.character.inventory;
+                        let inventory = &self.character.borrow().inventory;
                         // Get bounds of item in current position
                         let (start, size) = inventory.bounds(*idx as i32);
                         if start + size != inventory.capacity() {
@@ -116,15 +114,16 @@ impl Game {
                             *idx = start + size;
                         }
                     } else if dir == UIDirection::Up {
-                        let inventory = &self.character.inventory;
+                        let inventory = &self.character.borrow().inventory;
                         // Get bounds of item in previous position
                         let (start, _) = inventory.bounds(*idx as i32 - 1);
                         // Move cursor to the start of the item in previous position
                         *idx = start;
                     }
-                } else if self.controller.focus == self.character.id() {
+                } else if self.controller.focus == self.character.borrow().id() {
+                    let character = self.character.borrow();
                     let mut all_slots: Vec<&ItemSlot> =
-                        self.character.equipped_items().iter().map(|(k, _)| k).collect();
+                        character.equipped_items().iter().map(|(k, _)| k).collect();
                     all_slots.sort();
 
                     let cur_idx = all_slots.iter()
@@ -143,9 +142,9 @@ impl Game {
                 StateChange::Still
             }
             Command::Confirm => {
-                if self.controller.focus == self.character.inventory.id() {
+                if self.controller.focus == self.character.borrow().inventory.id() {
                     let idx = &mut self.controller.inventory;
-                    let character = &mut self.character;
+                    let character = &mut self.character.borrow_mut();
                     if let Some(item) = character.inventory.take(*idx as i32) {
                         match item {
                             Item::Equipment(equip) => {
@@ -162,9 +161,9 @@ impl Game {
                         }
                     };
                 }
-                if self.controller.focus == self.character.id() {
+                if self.controller.focus == self.character.borrow().id() {
                     let slot = &self.controller.equipment;
-                    let character = &mut self.character;
+                    let character = &mut self.character.borrow_mut();
                     if let Some(unequipped_item) = character.unequip(slot) {
                         character.inventory.put(unequipped_item.into());
                     };
@@ -217,8 +216,8 @@ impl Game {
                     .direction(Direction::Vertical)
                     .sizes(&[Size::Percent(50), Size::Percent(25), Size::Percent(25)])
                     .render(t, &chunks[1], |t, chunks| {
-                        self.character.inventory.render(t, &chunks[0], &self.controller);
-                        self.character.render(t, &chunks[1], &self.controller);
+                        self.character.borrow().inventory.render(t, &chunks[0], &self.controller);
+                        self.character.borrow().render(t, &chunks[1], &self.controller);
                         game_info.render(t, &chunks[2], &self.controller);
                     });
 
