@@ -5,7 +5,7 @@ use tui::widgets::*;
 use tui::layout::*;
 use rpglib::*;
 use super::*;
-use super::super::ui::View;
+use view::View;
 
 impl View for Inventory {
     fn id(&self) -> usize {

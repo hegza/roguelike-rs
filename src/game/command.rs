@@ -1,9 +1,5 @@
-pub trait View {
-    /// User provided unique identifier for this view. The identifier can be used to navigate using next and previous value.
-    fn id(&self) -> usize;
-}
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Direction {
     Right,
     Down,
@@ -16,6 +12,7 @@ pub enum Command {
     Nav(Direction),
     MoveSelect(Direction),
     Confirm,
+    Cheat(&'static str),
     Unknown,
 }
 
@@ -28,6 +25,7 @@ impl From<char> for Command {
             'l' => Command::Nav(Direction::Right),
             'k' => Command::MoveSelect(Direction::Up),
             'j' => Command::MoveSelect(Direction::Down),
+            'c' => Command::Cheat("combat_scene"),
             _ => Command::Unknown,
         }
     }

@@ -5,7 +5,7 @@ use tui::widgets::*;
 use tui::layout::*;
 use rpglib::*;
 use super::*;
-use super::super::ui::View;
+use view::View;
 
 fn create_slot_list<'a>(selected: Option<&ItemSlot>,
                         slots: &Vec<(&ItemSlot, Option<&'a Equipment>)>)

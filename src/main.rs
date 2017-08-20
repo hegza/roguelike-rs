@@ -3,12 +3,14 @@ extern crate tui;
 
 mod game;
 mod render;
-mod ui;
+mod view;
+mod scenes;
 
 use game::*;
 use tui::Terminal;
 use tui::backend::TermionBackend;
 use std::io::Read;
+use render::Render;
 
 fn get_char() -> char {
     std::io::stdin()
@@ -29,7 +31,7 @@ fn main() {
     let mut game = Game::new();
     loop {
         let size = terminal.size().unwrap();
-        game.render(&mut terminal, &size);
+        game.render(&mut terminal, &size, &game.controller);
         terminal.draw().unwrap();
 
         input = get_char();
