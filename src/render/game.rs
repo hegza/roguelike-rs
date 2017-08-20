@@ -6,7 +6,7 @@ use tui::layout::*;
 impl Render for Game {
     fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect, ctrl: &Controller) {
         // Create game info view
-        let game_info = GameInfo::new(&self.ticks);
+        let game_info = GameInfo::new(&self.character, &self.ticks);
 
         // Split the view in two horizontally
         Group::default()
