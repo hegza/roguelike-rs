@@ -4,5 +4,9 @@ version = "0.1.0"
 authors = ["Henri Lunnikivi <henri.lunnikivi@gmail.com>"]
 
 [dependencies]
-rpglib = { path = "../rpglib-rs" }
+rpglib = { git = "https://github.com/hegza/rpglib-rs" }
 tui = "*"
+
+[patch.git]
+rpglib = { path = "../rpglib-rs" }
+
