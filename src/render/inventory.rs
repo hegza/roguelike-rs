@@ -5,13 +5,6 @@ use tui::widgets::*;
 use tui::layout::*;
 use rpglib::*;
 use super::*;
-use view::View;
-
-impl View for Inventory {
-    fn id(&self) -> usize {
-        0
-    }
-}
 
 impl Render for Inventory {
     fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect, controller: &Controller) {

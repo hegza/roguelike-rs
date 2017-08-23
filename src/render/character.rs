@@ -39,12 +39,6 @@ fn create_slot_list<'a>(selected: Option<&ItemSlot>,
     (content, styles)
 }
 
-impl View for Character {
-    fn id(&self) -> usize {
-        1
-    }
-}
-
 impl Render for Character {
     fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect, ctrl: &Controller) {
         let focus = ctrl.focus == self.id();

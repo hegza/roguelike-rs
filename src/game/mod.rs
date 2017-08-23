@@ -14,7 +14,7 @@ pub struct Game {
     pub controller: Controller,
     pub character: Character,
     pub ticks: usize,
-    scene: Scene,
+    pub scene: Scene,
 }
 
 pub enum Scene {
@@ -61,6 +61,8 @@ impl Game {
             effects: vec![],
             english_name: "Food ration".to_owned(),
             size: 1,
+            uses: 1,
+            max_uses: 1,
         };
         my_character.inventory.put(item_1.into());
         my_character.inventory.put(item_2.into());
@@ -167,7 +169,7 @@ impl Game {
             Command::Cheat(cheat) => {
                 match cheat {
                     "combat_scene" => {
-                        let monster = Monster::new("scene monster", 1, 10, None);
+                        let monster = Monster::new("scene monster", 1, 10);
                         let scene = Scene::Combat(CombatScene::new(monster));
                         StateChange::ChangeScene(scene)
                     }
@@ -203,7 +205,7 @@ impl Game {
             &mut Scene::Combat(ref mut scene) => {
                 let results = scene.combat
                     .apply_round(&mut self.character, &mut scene.monster);
-                for log in results.english_log {
+                for ref log in &results.english_log {
                     println!("{}", log);
                 }
             }

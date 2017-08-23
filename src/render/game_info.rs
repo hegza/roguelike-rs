@@ -27,10 +27,8 @@ impl<'a> Render for GameInfo<'a> {
                                     format!("{}/{}",
                                             self.character.life(),
                                             self.character.attributes[&Attribute::MaxLife])),
-                           &format!("Stamina: {:>8}", "?/?"),
+                           &format!("Stamina: {:>8}", "? (?)"),
                            &format!("Ticks:   {:>8}", self.ticks)))
             .render(t, &area);
-        Paragraph::default().render(t, &area);
-        Paragraph::default().render(t, &area);
     }
 }
