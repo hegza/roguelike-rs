@@ -6,9 +6,9 @@ pub struct CombatScene {
 }
 
 impl CombatScene {
-    pub fn new(monster: Monster) -> CombatScene {
+    pub fn new(character: &Character, monster: Monster) -> CombatScene {
         CombatScene {
-            combat: Combat::new(),
+            combat: Combat::new(character, &monster),
             monster: monster,
         }
     }
