@@ -1,5 +1,8 @@
 pub mod command;
 
+mod inventory;
+mod character;
+
 pub use self::command::*;
 use game::*;
 use game::render::story::*;
@@ -50,6 +53,7 @@ pub fn apply(cmd: Command, state: &mut GameState) -> bool {
         }
     }
 
+    // Delegate input handling to the widget itself
     match state.controller.focused() {
         "inventory" => {
             Inventory::handle_input(cmd, state);
@@ -63,7 +67,6 @@ pub fn apply(cmd: Command, state: &mut GameState) -> bool {
         _ => {}
     }
 
-    // Delegate input handling to the widget itself
     return true;
 }
 
@@ -72,66 +75,6 @@ trait HandleInput {
     fn handle_input(cmd: Command, state: &mut GameState);
 }
 
-impl HandleInput for Inventory {
-    fn handle_input(cmd: Command, state: &mut GameState) {
-        let idx = state.controller.selected_idx(&"inventory");
-        let inventory = &state.character.inventory;
-        if let Command::MoveSelect(dir) = cmd {
-            match dir {
-                Direction::Down => {
-                    // Get bounds of item in current position
-                    let (start, size) = inventory.bounds(idx as i32);
-                    if start + size != inventory.capacity() {
-                        // Move cursor below the current item
-                        state.controller.set_selected_idx(start + size);
-                    }
-                }
-                Direction::Up => {
-                    // Get bounds of item in previous position
-                    let (start, _) = inventory.bounds(idx as i32 - 1);
-                    // Move cursor to the start of the item in previous position
-                    state.controller.set_selected_idx(start);
-                }
-                _ => {}
-            }
-        }
-    }
-}
-
-impl HandleInput for Character {
-    fn handle_input(cmd: Command, state: &mut GameState) {
-        use game::handle_input::command::Command::*;
-        match cmd {
-            MoveSelect(dir) => {
-                let character = &state.character;
-                let mut all_slots: Vec<&Slot> = character.slots();
-                all_slots.sort();
-
-                let cur_idx = state.controller.selected_idx("character");
-                if dir == Direction::Down {
-                    if cur_idx != all_slots.len() - 1 {
-                        state.controller.set_selected_idx(cur_idx + 1);
-                    }
-                } else if dir == Direction::Up {
-                    if cur_idx != 0 {
-                        state.controller.set_selected_idx(cur_idx - 1);
-                    }
-                }
-            }
-            Confirm => {
-                let character = &mut state.character;
-                let idx = state.controller.selected_idx("character");
-                let slot = (*character.nth_slot(idx).unwrap()).clone();
-                if let Some(unequipped_item) = character.unequip(&slot) {
-                    character.inventory.put(unequipped_item.into());
-                }
-            }
-            _ => {}
-        }
-    }
-}
-
 impl HandleInput for Story {
-    fn handle_input(cmd: Command, state: &mut GameState) {
-    }
+    fn handle_input(cmd: Command, state: &mut GameState) {}
 }
