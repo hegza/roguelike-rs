@@ -18,8 +18,13 @@ pub fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
                 _ => {}
             },
             Command::Confirm => match *&options[idx] {
-                PickUp(ref item) => {}
-                _ => {}
+                PickUp(ref item) => {
+
+                },
+                GoEast => {
+                    scene.enter_adjacent_room(CompassPoint::East);
+                }
+                _ => {},
             },
             _ => {}
         }

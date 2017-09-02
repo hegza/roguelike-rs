@@ -6,16 +6,16 @@ mod content;
 pub use self::story_state::*;
 
 use super::*;
-use range::*;
 use rpglib::*;
-use rpglib::generator::*;
 use game::controller::*;
 use self::content::*;
+use self::StoryState::*;
 
 pub struct GameScene {
     pub controller: Controller,
     /// Generated dungeon for this session.
     pub dungeon: Dungeon,
+    pub current_room: usize,
     /// Main character.
     pub player: Character,
     /// Story
@@ -25,28 +25,40 @@ pub struct GameScene {
 impl GameScene {
     pub fn new() -> GameScene {
         let character = create_character();
-
         let dungeon = create_dungeon();
-
-        let first_monster = {
-            let room = dungeon.first_room();
-            room.monster
-                .as_ref()
-                .expect("first room in dungeon must have a monster")
-                .clone()
-        };
-        let combat = Combat::new(&character, &first_monster);
-        let first_encounter = StoryState::CombatEncounter {
-            monster: first_monster,
-            combat,
-        };
-
-        GameScene {
+    
+        let mut scene = GameScene {
             controller: Controller::new(&vec!["story", "inventory", "character"]),
             dungeon,
+            current_room: 0,
             player: character,
-            story: first_encounter,
+            // HACK: should use a sensible default value
+            story: Final,
+        };
+        // Enter the first room before returning
+        scene.enter_room(0);
+        scene
+    }
+    pub fn enter_adjacent_room(&mut self, cp: CompassPoint) {
+        match self.dungeon.get_adjacent(self.current_room, cp) {
+            None => {
+                self.story = Final;
+            },
+            Some(&room_id) => {
+                self.enter_room(room_id);
+            }
         }
+    }
+    fn enter_room(&mut self, room_id: usize) {
+        eprintln!("player enters room {:?}", room_id);
+        self.current_room = room_id;
+        let room = self.dungeon.get_room(room_id);
+        let monster = room.monster.as_ref().expect("room must have a monster").clone();
+        let combat = Combat::new(&self.player, &monster);
+        self.story = CombatEncounter {
+            monster: monster,
+            combat: combat,
+        };
     }
 }
 
@@ -58,56 +70,4 @@ impl<'a> TryFrom<&'a Scene> for &'a GameScene {
             _ => Err("unable to convert scene to game scene"),
         }
     }
-}
-
-fn create_character() -> Character {
-    let mut attributes = CharacterAttributes::default();
-    attributes.set(Attribute::Constitution, 8);
-    let mut my_character = CharacterBuilder::new(2, 12, &attributes)
-        .named("hegza")
-        .build();
-
-    for item in STARTING_ITEMS.iter() {
-        my_character.inventory.put(item.clone().into());
-    }
-
-    my_character
-}
-
-
-fn create_dungeon() -> Dungeon {
-    let template_monsters = vec![];
-    const DUNGEON_KEYWORD_COUNT: usize = 10;
-    const ARCH_KEYWORD_COUNT: usize = 5;
-    const AREA_KEYWORD_COUNT: usize = 3;
-    const ARCH_COUNT: usize = 2;
-    let num_areas_in_arch: Range = Range::new(2, 1);
-    let num_main_rooms_in_area: Range = Range::new(3, 2);
-
-    let g = Generator::new(
-        MONSTER_POOL.as_slice(),
-        template_monsters.as_slice(),
-        THEME_KEYWORD_POOL.as_slice(),
-        DUNGEON_KEYWORD_COUNT,
-        ARCH_KEYWORD_COUNT,
-        AREA_KEYWORD_COUNT,
-        ARCH_COUNT,
-        num_areas_in_arch,
-        num_main_rooms_in_area,
-    );
-
-    // Act
-    let dungeon = g.generate(&SEED.as_slice());
-    eprintln!("Dungeon:");
-    for (i, room) in dungeon.rooms.iter().enumerate() {
-        let s = "\tRoom ".to_string() +
-            &format!(
-                "{} ({}): {:?}",
-                i + 1,
-                room.keyword.id,
-                room.monster.as_ref().unwrap()
-            );
-        eprintln!("{}", s);
-    }
-    dungeon
 }

@@ -1,4 +1,6 @@
+use range::*;
 use rpglib::*;
+use rpglib::generator::*;
 
 lazy_static! {
     // Zarad-dul, F, goddess of creating holes in people, trees, and the ground, etc; consumed with an all-encompassing rage
@@ -51,4 +53,55 @@ lazy_static! {
             .into(),
         consumable("food ration", 1, vec![]).build().into()
     ];
+}
+
+pub fn create_dungeon() -> Dungeon {
+    let template_monsters = vec![];
+    const DUNGEON_KEYWORD_COUNT: usize = 10;
+    const ARCH_KEYWORD_COUNT: usize = 5;
+    const AREA_KEYWORD_COUNT: usize = 3;
+    const ARCH_COUNT: usize = 2;
+    let num_areas_in_arch: Range = Range::new(2, 1);
+    let num_main_rooms_in_area: Range = Range::new(3, 2);
+
+    let g = Generator::new(
+        MONSTER_POOL.as_slice(),
+        template_monsters.as_slice(),
+        THEME_KEYWORD_POOL.as_slice(),
+        DUNGEON_KEYWORD_COUNT,
+        ARCH_KEYWORD_COUNT,
+        AREA_KEYWORD_COUNT,
+        ARCH_COUNT,
+        num_areas_in_arch,
+        num_main_rooms_in_area,
+    );
+
+    // Act
+    let dungeon = g.generate(&SEED.as_slice());
+    eprintln!("Dungeon:");
+    for (i, room) in dungeon.rooms.iter().enumerate() {
+        let s = "\tRoom ".to_string() +
+            &format!(
+                "{} ({}): {:?}",
+                i + 1,
+                room.keyword.id,
+                room.monster.as_ref().unwrap()
+            );
+        eprintln!("{}", s);
+    }
+    dungeon
+}
+
+pub fn create_character() -> Character {
+    let mut attributes = CharacterAttributes::default();
+    attributes.set(Attribute::Constitution, 8);
+    let mut my_character = CharacterBuilder::new(2, 12, &attributes)
+        .named("hegza")
+        .build();
+
+    for item in STARTING_ITEMS.iter() {
+        my_character.inventory.put(item.clone().into());
+    }
+
+    my_character
 }
