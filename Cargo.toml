@@ -8,4 +8,9 @@ rpglib = { path = "../rpglib-rs" }
 #rpglib = { git = "https://github.com/hegza/rpglib-rs" }
 tui = "*"
 gag = "*"
-textwrap = { version = "0.7", features = ["hyphenation"] }
+textwrap = { version = "0.7" }
+try_from = "*"
+lazy_static = "*"
+range = "*"
+rand = "*"
+Inflector = "*"

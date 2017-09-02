@@ -4,13 +4,13 @@ use tui::backend::TermionBackend;
 use tui::widgets::*;
 use tui::layout::*;
 use super::GameView;
-use game::GameState;
 use rpglib::item::*;
 use rpglib::display::*;
+use game::scenes::GameScene;
 
 pub struct Character {}
 impl GameView for Character {
-    fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect, state: &GameState) {
+    fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect, state: &GameScene) {
         let ctrl = &state.controller;
 
         let focus = ctrl.focused() == "character";
@@ -20,7 +20,7 @@ impl GameView for Character {
         };
         let (content, styles) = create_slot_list(
             selected,
-            &state.character.equipment().inner().iter().map(|&(ref k, ref v)| (k, v.as_ref())).collect(),
+            &state.player.equipment().inner().iter().map(|&(ref k, ref v)| (k, v.as_ref())).collect(),
         );
         let slots: Vec<(String, &Style)> =
             content.iter().map(|x| x.clone()).zip(styles.iter().map(|x| x)).collect();

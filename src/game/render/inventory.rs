@@ -4,13 +4,14 @@ use tui::backend::TermionBackend;
 use tui::widgets::*;
 use tui::layout::*;
 use super::GameView;
-use game::GameState;
 use rpglib::*;
+use game::scenes::GameScene;
+use inflector::Inflector;
 
 pub struct InventoryWidget {}
 impl GameView for InventoryWidget {
-    fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect, state: &GameState) {
-        let controller = &state.controller;
+    fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect, scene: &GameScene) {
+        let controller = &scene.controller;
         let focus = controller.focused() == "inventory";
         let select_index = controller.selected_idx("inventory");
         let hilight = match focus {
@@ -18,7 +19,7 @@ impl GameView for InventoryWidget {
             false => None,
         };
 
-        let (content, styles) = create_item_list(hilight, &state.character.inventory);
+        let (content, styles) = create_item_list(hilight, &scene.player.inventory);
         let items: Vec<(String, &Style)> =
             content.iter().map(|x| x.clone()).zip(styles.iter().map(|x| x)).collect();
 
@@ -40,21 +41,21 @@ fn create_item_list(
     let none_str = "<-     free     ->";
 
     let mut items = vec![];
-    let mut state = State::Empty;
+    let mut scene = State::Empty;
     for pos in 0..inventory.capacity() {
         // Collect items
-        match state {
+        match scene {
             State::Empty => match inventory.get(pos as i32) {
                 None => {
                     items.push(none_str.to_owned());
                 }
                 Some(item) => {
-                    let name = item.name();
+                    let name = item.name().to_title_case();
                     let display = match item.size() {
-                        1 => format!("(:{}:)", name.clone()),
+                        1 => format!("(:{}:)", name),
                         _ => {
-                            state = State::LargeItem(item.size() - 1, name.chars().count());
-                            format!("/´{}`\\", name.clone())
+                            scene = State::LargeItem(item.size() - 1, name.chars().count());
+                            format!("/´{}`\\", name)
                         }
                     };
                     items.push(display);
@@ -65,7 +66,7 @@ fn create_item_list(
                     "\\{}/",
                     (0..letters + 2).map(|_| "_").collect::<String>()
                 ));
-                state = State::Empty;
+                scene = State::Empty;
             }
             State::LargeItem(ref mut size, letters) => {
                 items.push(format!(

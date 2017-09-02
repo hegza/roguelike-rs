@@ -1,16 +1,25 @@
-extern crate rpglib;
-extern crate tui;
 extern crate gag;
+extern crate inflector;
+#[macro_use]
+extern crate lazy_static;
+extern crate rand;
+extern crate range;
+extern crate rpglib;
 extern crate textwrap;
+extern crate try_from;
+extern crate tui;
 
 mod game;
 
 use game::GameState;
 use tui::Terminal;
 use tui::backend::TermionBackend;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::fs::{File, OpenOptions};
 use gag::Redirect;
+
+/// Rapid prototyping mode
+static RP: bool = true;
 
 fn get_char() -> char {
     std::io::stdin()
@@ -35,7 +44,8 @@ fn redirect_stderr(filename: &'static str) -> Redirect<File> {
 }
 
 fn main() {
-    let print_redirect = redirect_stderr("./errors.log");
+    // stderr is redirected to a file while this variable is in scope
+    let _redirect_stderr = redirect_stderr("./errors.log");
 
     let backend = TermionBackend::new().unwrap();
     let mut terminal = Terminal::new(backend).unwrap();
@@ -53,7 +63,6 @@ fn main() {
         if !game.input(input) {
             break;
         }
-
     }
 
     terminal.show_cursor().unwrap();

@@ -25,6 +25,12 @@ impl Controller {
     pub fn selected_idx(&self, view_id: &'static str) -> usize {
         self.views.iter().find(|x| x.0 == view_id).unwrap().1
     }
+    pub fn selected_idx_mut(&mut self, view_id: &'static str) -> &mut usize {
+        match self.views.iter_mut().find(|x| x.0 == view_id) {
+            None => panic!(),
+            Some(&mut (_, ref mut u)) => u
+        }
+    }
     pub fn set_selected_idx(&mut self, idx: usize) {
         self.views[self.focus].1 = idx;
     }

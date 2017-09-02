@@ -1,8 +1,16 @@
-mod combat_scene;
+pub mod game_scene;
 
-pub use self::combat_scene::*;
+use try_from::*;
+pub use self::game_scene::*;
 
 pub enum Scene {
-    Combat(CombatScene),
-    OffCombat,
+    /// Initial state
+    Title,
+    Game(GameScene),
+}
+
+impl Scene {
+    pub fn game() -> Scene {
+        Scene::Game(GameScene::new())
+    }
 }
