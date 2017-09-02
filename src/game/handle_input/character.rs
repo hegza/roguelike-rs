@@ -29,7 +29,7 @@ impl HandleInput for Character {
                     let current_selection = player.equipment().at(idx);
                     match current_selection {
                         Some(item) => item.size(),
-                        None => 0
+                        None => 0,
                     }
                 };
                 let inventory_has_space = player.inventory.find_space(size_of_current).is_some();

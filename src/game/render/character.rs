@@ -20,10 +20,19 @@ impl GameView for Character {
         };
         let (content, styles) = create_slot_list(
             selected,
-            &state.player.equipment().inner().iter().map(|&(ref k, ref v)| (k, v.as_ref())).collect(),
+            &state
+                .player
+                .equipment()
+                .inner()
+                .iter()
+                .map(|&(ref k, ref v)| (k, v.as_ref()))
+                .collect(),
         );
-        let slots: Vec<(String, &Style)> =
-            content.iter().map(|x| x.clone()).zip(styles.iter().map(|x| x)).collect();
+        let slots: Vec<(String, &Style)> = content
+            .iter()
+            .map(|x| x.clone())
+            .zip(styles.iter().map(|x| x))
+            .collect();
 
         Group::default()
             .direction(Direction::Vertical)
@@ -32,7 +41,9 @@ impl GameView for Character {
             .render(t, area, |t, chunks| {
                 List::default()
                     .block(
-                        Block::default().borders(border::ALL).title("List of equipped items"),
+                        Block::default()
+                            .borders(border::ALL)
+                            .title("List of equipped items"),
                     )
                     .items(&slots)
                     .render(t, &chunks[0]);

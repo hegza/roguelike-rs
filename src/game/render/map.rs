@@ -10,7 +10,10 @@ impl GameView for Map {
     fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect, _: &GameScene) {
         Paragraph::default()
             .block(Block::default().borders(border::ALL).title("World Map"))
-            .text(&format!("This is supposed to be a map:\n\n{}", "o---------o"))
+            .text(&format!(
+                "This is supposed to be a map:\n\n{}",
+                "o---------o"
+            ))
             .render(t, &area);
     }
 }

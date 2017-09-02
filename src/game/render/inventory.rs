@@ -20,8 +20,11 @@ impl GameView for InventoryWidget {
         };
 
         let (content, styles) = create_item_list(hilight, &scene.player.inventory);
-        let items: Vec<(String, &Style)> =
-            content.iter().map(|x| x.clone()).zip(styles.iter().map(|x| x)).collect();
+        let items: Vec<(String, &Style)> = content
+            .iter()
+            .map(|x| x.clone())
+            .zip(styles.iter().map(|x| x))
+            .collect();
 
         List::default()
             .block(Block::default().borders(border::ALL).title("Inventory"))

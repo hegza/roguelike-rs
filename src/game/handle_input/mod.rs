@@ -78,22 +78,19 @@ fn handle_input_for_game(cmd: Command, game: &mut GameScene) {
 
     // Delegate input handling to a specific handler based on focus
     let advance = match game.controller.focused() {
-        "inventory" => {
-            Inventory::handle_input(cmd, game)
-        }
-        "character" => {
-            Character::handle_input(cmd, game)
-        }
-        "story" => {
-            Story::handle_input(cmd, game)
-        }
-        _ => false
+        "inventory" => Inventory::handle_input(cmd, game),
+        "character" => Character::handle_input(cmd, game),
+        "story" => Story::handle_input(cmd, game),
+        _ => false,
     };
     if advance {
         match game.story {
-            CombatEncounter { ref mut combat, ref mut monster } => {
+            CombatEncounter {
+                ref mut combat,
+                ref mut monster,
+            } => {
                 combat.apply_round(&mut game.player, monster);
-            },
+            }
             _ => {}
         }
     }

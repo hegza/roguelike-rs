@@ -20,15 +20,31 @@ impl GameView for Story {
     }
 }
 
-fn render_combat(t: &mut Terminal<TermionBackend>, area: &Rect,
-        scene: &GameScene, focused: Option<usize>) {
-    let options: Vec<(String, Style)> = create_options(focused, scene.story.options().iter().map(|s|s.into()).collect::<Vec<String>>().as_slice());
+fn render_combat(
+    t: &mut Terminal<TermionBackend>,
+    area: &Rect,
+    scene: &GameScene,
+    focused: Option<usize>,
+) {
+    let options: Vec<(String, Style)> = create_options(
+        focused,
+        scene
+            .story
+            .options()
+            .iter()
+            .map(|s| s.into())
+            .collect::<Vec<String>>()
+            .as_slice(),
+    );
 
     let title: String;
     let paragraph: String;
 
     match scene.story {
-        StoryState::CombatEncounter {ref combat, ref monster} => {
+        StoryState::CombatEncounter {
+            ref combat,
+            ref monster,
+        } => {
             let log_text = match combat.results {
                 Results::Begin { ref log, .. } |
                 Results::Round { ref log, .. } |
@@ -39,11 +55,11 @@ fn render_combat(t: &mut Terminal<TermionBackend>, area: &Rect,
             let log = fill(log_text, max_log_width);
             title = format!("Fight the {}", monster.name());
             paragraph = format!("{}", log);
-        },
-        StoryState::OpenTreasure{..} => {
+        }
+        StoryState::OpenTreasure { .. } => {
             title = "Treasure".to_owned();
             paragraph = String::new();
-        },
+        }
         StoryState::Final => {
             title = "You win!".to_owned();
             paragraph = String::new();
@@ -57,18 +73,17 @@ fn render_combat(t: &mut Terminal<TermionBackend>, area: &Rect,
         .sizes(&[Size::Percent(34), Size::Percent(33), Size::Percent(33)])
         .render(t, area, |t, chunks| {
             // 1st: status
-            Block::default()
-                .title(&title)
-                .render(t, &chunks[0]);
+            Block::default().title(&title).render(t, &chunks[0]);
             // 2nd: paragraph
-            Paragraph::default()
-                .text(&paragraph).render(t, &chunks[1]);
+            Paragraph::default().text(&paragraph).render(t, &chunks[1]);
             // 3rd: options
             List::default()
-                .items(&options.iter().map(|&(ref o, ref s)| (o.clone(), s)).collect::<Vec<(String, &Style)>>())
+                .items(&options
+                    .iter()
+                    .map(|&(ref o, ref s)| (o.clone(), s))
+                    .collect::<Vec<(String, &Style)>>())
                 .render(t, &chunks[2]);
         });
-
 }
 
 fn create_options(selected_idx: Option<usize>, options: &[String]) -> Vec<(String, Style)> {

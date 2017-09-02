@@ -51,13 +51,14 @@ impl UI {
                     direction: Vertical,
                     sizes: vec![Percent(50), Percent(25), Percent(25)],
                     nodes: vec![
-                        inventory, character,
+                        inventory,
+                        character,
                         Box::new(Split {
                             direction: Horizontal,
                             sizes: vec![Percent(50), Percent(50)],
-                            nodes: vec![game_info, help]
-                        })
-                    ]
+                            nodes: vec![game_info, help],
+                        }),
+                    ],
                 }),
             ],
         };
