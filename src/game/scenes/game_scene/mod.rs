@@ -1,4 +1,9 @@
+pub mod story_option;
+pub mod story_state;
+
 mod content;
+
+pub use self::story_state::*;
 
 use super::*;
 use range::*;
@@ -15,54 +20,6 @@ pub struct GameScene {
     pub player: Character,
     /// Story
     pub story: StoryState,
-}
-
-pub enum StoryState {
-    /// Current encounter.
-    CombatEncounter {
-        /// The monster that the player is currently fighting with.
-        monster: Monster,
-        /// The ongoing combat
-        combat: Combat,
-    },
-    OpenTreasure { items: Vec<Item> },
-    Final,
-}
-
-impl StoryState {
-    pub fn has_free_nav(&self) -> bool {
-        use self::StoryState::*;
-        match *self {
-            CombatEncounter { .. } => false,
-            _ => true,
-        }
-    }
-    pub fn options(&self) -> Vec<String> {
-        use self::StoryState::*;
-        match *self {
-            CombatEncounter { ref combat, .. } => {
-                let mut strs: Vec<&str> = vec![];
-                match combat.has_ended() {
-                    false => {
-                        strs.extend(&vec!["Attack", "Equip", "Unequip"]);
-                    }
-                    true => {
-                        strs.extend(&vec!["Search"]);
-                    }
-                }
-                strs.iter().map(|&s| s.to_owned()).collect()
-            }
-            OpenTreasure { ref items } => {
-                let mut strs: Vec<String> = Vec::with_capacity(items.len() + 1);
-                for item in items {
-                    strs.push(format!("Pick up {}", item.name()))
-                }
-                strs.push("Travel east...".to_owned());
-                strs
-            }
-            Final => vec!["Yay..?".to_owned()],
-        }
-    }
 }
 
 impl GameScene {

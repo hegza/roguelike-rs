@@ -22,7 +22,7 @@ impl GameView for Story {
 
 fn render_combat(t: &mut Terminal<TermionBackend>, area: &Rect,
         scene: &GameScene, focused: Option<usize>) {
-    let options: Vec<(String, Style)> = create_options(focused, scene.story.options().as_slice());
+    let options: Vec<(String, Style)> = create_options(focused, scene.story.options().iter().map(|s|s.into()).collect::<Vec<String>>().as_slice());
 
     let title: String;
     let paragraph: String;

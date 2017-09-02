@@ -1,4 +1,5 @@
 mod encounter;
+mod treasure;
 
 use super::*;
 
@@ -10,24 +11,7 @@ impl HandleInput for Story {
                 return encounter::handle_input(cmd, scene);
             }
             StoryState::OpenTreasure { .. } => {
-                let idx = scene.controller.selected_idx(&"story");
-                let options = scene.story.options();
-                match cmd {
-                    Command::MoveSelect(dir) => {
-                        match dir {
-                            Direction::Down => if idx != options.len() - 1 {
-                                scene.controller.set_selected_idx(idx + 1);
-                            },
-                            Direction::Up => if idx != 0 {
-                                scene.controller.set_selected_idx(idx - 1);
-                            },
-                            _ => {}
-                        }
-                    }
-                    Command::Confirm => {
-                    }
-                    _ => {}
-                }
+                return treasure::handle_input(cmd, scene);
             }
             StoryState::Final => {}
         }

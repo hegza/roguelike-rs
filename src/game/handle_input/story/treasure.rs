@@ -4,7 +4,7 @@ use game::scenes::game_scene::*;
 use game::scenes::game_scene::story_option::StoryOption::*;
 
 pub fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
-    if let StoryState::CombatEncounter{ .. } = scene.story {
+    if let StoryState::OpenTreasure{ .. } = scene.story {
         let idx = scene.controller.selected_idx(&"story");
         let options = scene.story.options();
         match cmd {
@@ -21,16 +21,8 @@ pub fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
             }
             Command::Confirm => {
                 match *&options[idx] {
-                    Attack => {
-                        return true;
-                    },
-                    Search => {
-                        scene.story = OpenTreasure {
-                            items: vec![
-                                equipment("Gold", 1, Slot::Hand, vec![]).build().into(),
-                            ],
-                        };
-                        return true;
+                    PickUp(ref item) => {
+
                     }
                     _ => {}
                 }
@@ -39,7 +31,7 @@ pub fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
         }
     }
     else {
-        panic!("encounter::handle_input should not be called while not in encounter mode");
+        panic!("treasure::handle_input should not be called while not in treasure mode");
     }
     false
 }

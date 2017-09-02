@@ -15,7 +15,7 @@ use self::command::Command::*;
 use self::command::GlobalCommand::*;
 
 lazy_static!{
-    static ref KEY_BINDINGS: HashMap<char, Command> = hashmap!(
+    pub static ref KEY_BINDINGS: HashMap<char, Command> = hashmap!(
         'q' => Global(Quit),
         'c' => Global(Cheat("combat_scene")),
         'e' => Confirm,
