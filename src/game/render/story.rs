@@ -7,6 +7,12 @@ use super::GameView;
 use rpglib::*;
 use textwrap::fill;
 use game::scenes::*;
+use game::scenes::game_scene::story_option::*;
+
+lazy_static!{
+    static ref DEFAULT_STYLE: Style = Style::default().fg(Color::Yellow);
+    static ref HILIGHT_STYLE: Style = Style::default().fg(Color::Yellow).modifier(Modifier::Bold);
+}
 
 pub struct Story;
 impl GameView for Story {
@@ -26,19 +32,9 @@ fn render_combat(
     scene: &GameScene,
     focused: Option<usize>,
 ) {
-    let options: Vec<(String, Style)> = create_options(
-        focused,
-        scene
-            .story
-            .options()
-            .iter()
-            .map(|s| s.into())
-            .collect::<Vec<String>>()
-            .as_slice(),
-    );
-
     let title: String;
     let paragraph: String;
+    let options: Vec<String>;
 
     match scene.story {
         StoryState::CombatEncounter {
@@ -55,16 +51,29 @@ fn render_combat(
             let log = fill(log_text, max_log_width);
             title = format!("Fight the {}", monster.name());
             paragraph = format!("{}", log);
+            options = scene.story.options().iter().map(|x| x.into()).collect();
         }
-        StoryState::OpenTreasure { .. } => {
+        StoryState::OpenTreasure { ref items } => {
             title = "Treasure".to_owned();
             paragraph = String::new();
+            options = scene
+                .story
+                .options()
+                .iter()
+                .map(|o| match *o {
+                    StoryOption::PickUp(item_idx) => format!("Pick up {}", items[item_idx].name()),
+                    ref s => s.into(),
+                })
+                .collect();
         }
         StoryState::Final => {
             title = "You win!".to_owned();
             paragraph = String::new();
+            options = scene.story.options().iter().map(|x| x.into()).collect();
         }
     }
+
+    let options_list: Vec<(String, &Style)> = create_options_list(focused, &options.as_slice());
 
     // Split in three vertically
     Group::default()
@@ -78,20 +87,15 @@ fn render_combat(
             Paragraph::default().text(&paragraph).render(t, &chunks[1]);
             // 3rd: options
             List::default()
-                .items(&options
-                    .iter()
-                    .map(|&(ref o, ref s)| (o.clone(), s))
-                    .collect::<Vec<(String, &Style)>>())
+                .items(&options_list.as_slice())
                 .render(t, &chunks[2]);
         });
 }
 
-fn create_options(selected_idx: Option<usize>, options: &[String]) -> Vec<(String, Style)> {
-    let default_style = Style::default().fg(Color::Yellow);
-    let hilight_style = Style::default().fg(Color::Yellow).modifier(Modifier::Bold);
-    let mut styles = vec![default_style; options.len()];
+fn create_options_list(selected_idx: Option<usize>, options: &[String]) -> Vec<(String, &Style)> {
+    let mut styles: Vec<&Style> = vec![&DEFAULT_STYLE; options.len()];
     if let Some(idx) = selected_idx {
-        styles[idx] = hilight_style;
+        styles[idx] = &HILIGHT_STYLE;
     }
     options.iter().map(|o| o.clone()).zip(styles).collect()
 }

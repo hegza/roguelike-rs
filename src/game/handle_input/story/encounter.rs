@@ -6,10 +6,10 @@ use game::scenes::game_scene::story_option::StoryOption::*;
 pub fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
     if let StoryState::CombatEncounter { .. } = scene.story {
         let idx = scene.controller.selected_idx(&"story");
-        let options = scene.story.options();
+        let option_count = scene.story.options().len();
         match cmd {
             Command::MoveSelect(dir) => match dir {
-                Direction::Down => if idx != options.len() - 1 {
+                Direction::Down => if idx != option_count - 1 {
                     scene.controller.set_selected_idx(idx + 1);
                 },
                 Direction::Up => if idx != 0 {
@@ -17,7 +17,7 @@ pub fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
                 },
                 _ => {}
             },
-            Command::Confirm => match *&options[idx] {
+            Command::Confirm => match scene.story.options()[idx] {
                 Attack => {
                     return true;
                 }

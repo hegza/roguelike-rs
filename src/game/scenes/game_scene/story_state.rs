@@ -22,16 +22,15 @@ impl StoryState {
         match *self {
             CombatEncounter { ref combat, .. } => match combat.has_ended() {
                 false => vec![Attack, Equip, Unequip],
+                // TODO: should check if player's dead instead of assuming that monster is
                 true => vec![Search],
             },
             OpenTreasure { ref items } => {
-                let mut options = Vec::with_capacity(items.len() + 1);
-                options.extend(
-                    items
-                        .iter()
-                        .map(|item| PickUp(item.clone()))
-                        .collect::<Vec<StoryOption>>(),
-                );
+                let mut options = Vec::with_capacity(items.len() + 2);
+                for i in 0..items.len() {
+                    options.push(PickUp(i));
+                }
+                options.push(Drop);
                 options.push(GoEast);
                 options
             }
