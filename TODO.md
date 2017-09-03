@@ -7,15 +7,16 @@
 		* E: social options
 		* E: serialization
 ## Product Backlog
-* R: allow player to proceed to next room from the loot swap scene
 * R, 2: a couple of consumable items
 * U, 1: 10 encounters, 1 reward each
-* R: create reward item from loot table and display it for the player
-* R: claim or ignore reward + move to next encounter
+* R, 3: create reward item from loot table and display it for the player
+* R, 1: claim or ignore reward + move to next encounter
 * R, 1: combat options: (clear +) attack + evade
 * R, 1: implement stamina
 * R: 3: deliver to #substance/#natsukoodi -> gather feedback on UI and mechanics
+* US: I don't like the drop-thing; it breaks the enter-enter flow
 === MS 1 ^
+* R: 1: do a bottom-up commentation pass
 * R: Obsolete combat-options
 * R, 2: disallow equipping and unequipping items for free (disallow nav command while in combat);
 		* T: handle input should return advance:bool
