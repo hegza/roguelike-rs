@@ -16,7 +16,7 @@ pub struct GameScene {
     /// Generated dungeon for this session.
     pub dungeon: Dungeon,
     pub current_room: usize,
-    /// Main character.
+    /// Main character. Has inventory and equipment.
     pub player: Character,
     /// Story
     pub story: StoryState,
@@ -26,7 +26,7 @@ impl GameScene {
     pub fn new() -> GameScene {
         let character = create_character();
         let dungeon = create_dungeon();
-    
+
         let mut scene = GameScene {
             controller: Controller::new(&vec!["story", "inventory", "character"]),
             dungeon,
@@ -43,7 +43,7 @@ impl GameScene {
         match self.dungeon.get_adjacent(self.current_room, cp) {
             None => {
                 self.story = Final;
-            },
+            }
             Some(&room_id) => {
                 self.enter_room(room_id);
             }
@@ -53,7 +53,10 @@ impl GameScene {
         eprintln!("player enters room {:?}", room_id);
         self.current_room = room_id;
         let room = self.dungeon.get_room(room_id);
-        let monster = room.monster.as_ref().expect("room must have a monster").clone();
+        let monster = room.monster
+            .as_ref()
+            .expect("room must have a monster")
+            .clone();
         let combat = Combat::new(&self.player, &monster);
         self.story = CombatEncounter {
             monster: monster,
