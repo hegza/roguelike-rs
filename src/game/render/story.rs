@@ -41,24 +41,33 @@ fn render_combat(
     let options: Vec<String>;
 
     match scene.story {
-        StoryState::CombatEncounter {
-            ref combat,
-            ref monster,
-        } => {
-            let log_text = match combat.results {
-                Results::Begin { ref log, .. } |
-                Results::Round { ref log, .. } |
-                Results::End { ref log, .. } => log,
-            };
+        StoryState::Encounter(ref encounter) => {
+            match *encounter {
+                Some(ref encounter) => {
+                    let log_text = match encounter.combat.results {
+                        Results::Begin { ref log, .. } |
+                        Results::Round { ref log, .. } |
+                        Results::End { ref log, .. } => log,
+                    };
 
-            let max_log_width = (area.width - 8) as usize;
-            let log = fill(log_text, max_log_width);
-            title = format!("Fight the {}", monster.name());
-            paragraph = format!("{}", log);
+                    let max_log_width = (area.width - 8) as usize;
+                    let log = fill(log_text, max_log_width);
+                    title = format!(
+                        "You have encountered {} {}",
+                        encounter.monster.indefinite_article(),
+                        encounter.monster.name()
+                    );
+                    paragraph = format!("{}", log);
+                }
+                None => {
+                    title = "Safety".to_owned();
+                    paragraph = "".to_owned()
+                }
+            }
             options = scene.story.options().iter().map(|x| x.into()).collect();
         }
         StoryState::OpenTreasure { ref items } => {
-            title = "Treasure".to_owned();
+            title = "Safety".to_owned();
             paragraph = String::new();
             options = scene
                 .story

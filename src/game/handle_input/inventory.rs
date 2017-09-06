@@ -48,6 +48,14 @@ impl HandleInput for Inventory {
                     }
                 }
             }
+            Command::Drop => match scene.story {
+                StoryState::OpenTreasure { ref mut items } => {
+                    let item = scene.player.inventory.take(idx as i32).unwrap();
+                    items.push(item);
+                }
+                // Disallow dropping items by default
+                _ => {}
+            },
             _ => {}
         }
         false

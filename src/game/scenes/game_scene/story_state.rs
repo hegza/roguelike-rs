@@ -5,14 +5,32 @@ use game::handle_input::command::Command::*;
 
 pub enum StoryState {
     /// Current encounter.
-    CombatEncounter {
-        /// The monster that the player is currently fighting with.
-        monster: Monster,
-        /// The ongoing combat
-        combat: Combat,
-    },
+    Encounter(Option<CombatEncounter>),
     OpenTreasure { items: Vec<Item> },
     Final,
+}
+
+pub struct CombatEncounter {
+    /// The monster that the player is currently fighting with.
+    pub monster: Monster,
+    /// The ongoing combat
+    pub combat: Combat,
+}
+
+impl CombatEncounter {
+    pub fn new(player: &Character, room: &Room) -> Option<CombatEncounter> {
+        match room.monster {
+            None => None,
+            Some(ref m) => {
+                let monster = m.clone();
+                let combat = Combat::new(player, &monster);
+                Some(CombatEncounter {
+                    monster: monster,
+                    combat: combat,
+                })
+            }
+        }
+    }
 }
 
 impl StoryState {
@@ -20,17 +38,21 @@ impl StoryState {
         use self::StoryState::*;
         use self::StoryOption::*;
         match *self {
-            CombatEncounter { ref combat, .. } => match combat.has_ended() {
-                false => vec![Attack, Equip, Unequip],
-                // TODO: should check if player's dead instead of assuming that monster is
-                true => vec![Search],
+            Encounter(ref encounter) => match *encounter {
+                Some(ref encounter) => {
+                    match encounter.combat.has_ended() {
+                        false => vec![Attack],
+                        // TODO: should check if player's dead instead of assuming that monster is
+                        true => vec![Search],
+                    }
+                }
+                None => vec![Search],
             },
             OpenTreasure { ref items } => {
                 let mut options = Vec::with_capacity(items.len() + 2);
                 for i in 0..items.len() {
                     options.push(PickUp(i));
                 }
-                options.push(Drop);
                 options.push(GoEast);
                 options
             }
@@ -40,7 +62,12 @@ impl StoryState {
     pub fn has_free_nav(&self) -> bool {
         use self::StoryState::*;
         match *self {
-            CombatEncounter { .. } => false,
+            Encounter(ref combat_encounter) => {
+                if combat_encounter.is_some() {
+                    return false;
+                }
+                true
+            }
             _ => true,
         }
     }
@@ -79,6 +106,17 @@ impl StoryState {
                 "confirm selection",
                 Box::new(|cmd| match *cmd {
                     Confirm => true,
+                    _ => false,
+                }),
+                &bindings,
+            ));
+        }
+        // Describe drop keys
+        if let StoryState::OpenTreasure { .. } = *self {
+            guides.push(create_guide(
+                "drop item",
+                Box::new(|cmd| match *cmd {
+                    Drop => true,
                     _ => false,
                 }),
                 &bindings,

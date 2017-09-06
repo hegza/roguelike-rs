@@ -19,6 +19,7 @@ lazy_static!{
         'q' => Global(Quit),
         'c' => Global(Cheat("combat_scene")),
         'e' => Confirm,
+        'd' => Drop,
         'h' => Nav(Direction::Left),
         'l' => Nav(Direction::Right),
         'k' => MoveSelect(Direction::Up),
@@ -85,12 +86,14 @@ fn handle_input_for_game(cmd: Command, game: &mut GameScene) {
     };
     if advance {
         match game.story {
-            CombatEncounter {
-                ref mut combat,
-                ref mut monster,
-            } => {
-                combat.apply_round(&mut game.player, monster);
-            }
+            Encounter(ref mut encounter) => match *encounter {
+                Some(ref mut encounter) => {
+                    encounter
+                        .combat
+                        .apply_round(&mut game.player, &mut encounter.monster);
+                }
+                None => {}
+            },
             _ => {}
         }
     }

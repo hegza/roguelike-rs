@@ -53,15 +53,7 @@ impl GameScene {
         eprintln!("player enters room {:?}", room_id);
         self.current_room = room_id;
         let room = self.dungeon.get_room(room_id);
-        let monster = room.monster
-            .as_ref()
-            .expect("room must have a monster")
-            .clone();
-        let combat = Combat::new(&self.player, &monster);
-        self.story = CombatEncounter {
-            monster: monster,
-            combat: combat,
-        };
+        self.story = StoryState::Encounter(CombatEncounter::new(&self.player, room));
     }
 }
 

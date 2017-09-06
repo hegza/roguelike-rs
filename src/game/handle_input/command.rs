@@ -17,6 +17,7 @@ pub enum Command {
     Global(GlobalCommand),
     Nav(Direction),
     MoveSelect(Direction),
+    Drop,
     Confirm,
     Unknown,
 }

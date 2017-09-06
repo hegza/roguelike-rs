@@ -4,7 +4,6 @@ pub enum StoryOption {
     Unequip,
     Search,
     GoEast,
-    Drop,
     PickUp(usize),
 }
 
@@ -17,7 +16,6 @@ impl<'a> From<&'a StoryOption> for String {
             Unequip => "Unequip..".to_owned(),
             Search => "Search".to_owned(),
             PickUp(item_idx) => format!("Pick up {}", item_idx),
-            Drop => "Drop something..".to_owned(),
             GoEast => "Travel East...".to_owned(),
         }
     }

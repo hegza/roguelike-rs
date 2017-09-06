@@ -7,7 +7,7 @@ pub struct Story;
 impl HandleInput for Story {
     fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
         match scene.story {
-            StoryState::CombatEncounter { .. } => {
+            StoryState::Encounter { .. } => {
                 return encounter::handle_input(cmd, scene);
             }
             StoryState::OpenTreasure { .. } => {
