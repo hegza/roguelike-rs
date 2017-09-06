@@ -59,7 +59,7 @@ impl Controller {
     pub fn focused(&self) -> &str {
         self.views.iter().nth(self.focus).unwrap().view_id
     }
-    pub fn set_selected_idx_safe(&mut self, idx: usize, max: usize) -> usize {
+    pub fn set_selected_idx_safe(&mut self, idx: i32, max: usize) -> usize {
         self.views[self.focus].set_safe(idx, max)
     }
 }
@@ -77,9 +77,9 @@ impl View {
             selected_idx: 0,
         }
     }
-    pub fn set_safe(&mut self, val: usize, max_val: usize) -> usize {
-        let nval = max(min(val, max_val), 0);
-        self.selected_idx = nval;
-        nval
+    pub fn set_safe(&mut self, val: i32, max_val: usize) -> usize {
+        let nval = max(min(val, max_val as i32), 0) as usize;
+        self.selected_idx = nval as usize;
+        nval as usize
     }
 }

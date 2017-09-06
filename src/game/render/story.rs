@@ -19,7 +19,11 @@ impl GameView for Story {
     fn render(&self, t: &mut Terminal<TermionBackend>, area: &Rect, scene: &GameScene) {
         let mut focused = None;
         if scene.controller.focused() == "story" {
-            focused = Some(scene.controller.selected_idx("story"));
+            focused = Some(
+                scene
+                    .controller
+                    .selected_idx_safe("story", scene.story.options().len() - 1),
+            );
         }
 
         render_combat(t, area, scene, focused);

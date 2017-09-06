@@ -4,17 +4,23 @@ use game::scenes::game_scene::*;
 use game::scenes::game_scene::story_option::StoryOption::*;
 
 pub fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
-    if let StoryState::CombatEncounter { .. } = scene.story {
-        let idx = scene.controller.selected_idx(&"story");
+    if let StoryState::Encounter { .. } = scene.story {
         let option_count = scene.story.options().len();
+        let idx = scene
+            .controller
+            .selected_idx_safe(&"story", option_count - 1);
         match cmd {
             Command::MoveSelect(dir) => match dir {
-                Direction::Down => if idx != option_count - 1 {
-                    scene.controller.set_selected_idx(idx + 1);
-                },
-                Direction::Up => if idx != 0 {
-                    scene.controller.set_selected_idx(idx - 1);
-                },
+                Direction::Down => {
+                    scene
+                        .controller
+                        .set_selected_idx_safe(idx as i32 + 1, option_count - 1);
+                }
+                Direction::Up => {
+                    scene
+                        .controller
+                        .set_selected_idx_safe(idx as i32 - 1, option_count - 1);
+                }
                 _ => {}
             },
             Command::Confirm => match scene.story.options()[idx] {

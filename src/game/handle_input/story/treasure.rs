@@ -10,16 +10,20 @@ pub fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
         let option_count = options.len();
         match cmd {
             Command::MoveSelect(dir) => match dir {
-                Direction::Down => if idx != option_count - 1 {
-                    scene.controller.set_selected_idx(idx + 1);
-                },
-                Direction::Up => if idx != 0 {
-                    scene.controller.set_selected_idx(idx - 1);
-                },
+                Direction::Down => {
+                    scene
+                        .controller
+                        .set_selected_idx_safe(idx as i32 + 1, option_count - 1);
+                }
+                Direction::Up => {
+                    scene
+                        .controller
+                        .set_selected_idx_safe(idx as i32 - 1, option_count - 1);
+                }
                 _ => {}
             },
             Command::Confirm => match options[idx] {
-                PickUp(item_idx) => {
+                PickUp(_) => {
                     // TODO: take the item from the rewards list and add it to player's inventory
                     let inventory = &mut scene.player.inventory;
 

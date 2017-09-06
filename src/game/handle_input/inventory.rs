@@ -12,16 +12,18 @@ impl HandleInput for Inventory {
                     Direction::Down => {
                         // Get bounds of item in current position
                         let (start, size) = inventory.bounds(idx as i32);
-                        if start + size != inventory.capacity() {
-                            // Move cursor below the current item
-                            scene.controller.set_selected_idx(start + size);
-                        }
+                        // Move cursor below the current item
+                        scene
+                            .controller
+                            .set_selected_idx_safe((start + size) as i32, inventory.capacity() - 1);
                     }
                     Direction::Up => {
                         // Get bounds of item in previous position
                         let (start, _) = inventory.bounds(idx as i32 - 1);
                         // Move cursor to the start of the item in previous position
-                        scene.controller.set_selected_idx(start);
+                        scene
+                            .controller
+                            .set_selected_idx_safe(start as i32, inventory.capacity() - 1);
                     }
                     _ => {}
                 }
