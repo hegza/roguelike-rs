@@ -29,7 +29,7 @@ pub fn handle_input(cmd: Command, scene: &mut GameScene) -> bool {
                 }
                 Search => {
                     scene.story = OpenTreasure {
-                        items: vec![equipment("Gold", 1, Slot::Hand, vec![]).build().into()],
+                        items: vec![equipment("gold", 1, Slot::Hand, vec![]).build().into()],
                     };
                     return true;
                 }

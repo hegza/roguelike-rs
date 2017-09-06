@@ -8,6 +8,7 @@ use rpglib::*;
 use textwrap::fill;
 use game::scenes::*;
 use game::scenes::game_scene::story_option::*;
+use inflector::Inflector;
 
 lazy_static!{
     static ref DEFAULT_STYLE: Style = Style::default().fg(Color::Yellow);
