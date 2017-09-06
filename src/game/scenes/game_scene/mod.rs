@@ -9,17 +9,16 @@ use super::*;
 use rpglib::*;
 use game::controller::*;
 use self::content::*;
-use self::StoryState::*;
 
 pub struct GameScene {
     pub controller: Controller,
     /// Generated dungeon for this session.
     pub dungeon: Dungeon,
-    pub current_room: usize,
     /// Main character. Has inventory and equipment.
     pub player: Character,
     /// Story
     pub story: StoryState,
+    current_room: usize,
 }
 
 impl GameScene {
@@ -32,19 +31,21 @@ impl GameScene {
             dungeon,
             current_room: 0,
             player: character,
-            // HACK: should use a sensible default value
-            story: Final,
+            story: StoryState::OpenTreasure { items: vec![] },
         };
         // Enter the first room before returning
         scene.enter_room(0);
         scene
     }
+    pub fn current_room(&self) -> &Room {
+        self.dungeon.get_room(self.current_room)
+    }
     pub fn enter_adjacent_room(&mut self, cp: CompassPoint) {
         match self.dungeon.get_adjacent(self.current_room, cp) {
             None => {
-                self.story = Final;
+                self.story = StoryState::Final;
             }
-            Some(&room_id) => {
+            Some(room_id) => {
                 self.enter_room(room_id);
             }
         }

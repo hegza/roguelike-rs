@@ -74,9 +74,9 @@ pub fn create_dungeon() -> Dungeon {
         ARCH_COUNT,
         num_areas_in_arch,
         num_main_rooms_in_area,
+        true
     );
 
-    // Act
     let dungeon = g.generate(&SEED.as_slice());
     eprintln!("Dungeon:");
     for (i, room) in dungeon.rooms.iter().enumerate() {
@@ -85,7 +85,10 @@ pub fn create_dungeon() -> Dungeon {
                 "{} ({}): {:?}",
                 i + 1,
                 room.keyword.id,
-                room.monster.as_ref().unwrap()
+                match room.monster {
+                    Some(ref m) => format!("{:?}", m),
+                    None => "None".to_owned(),
+                }
             );
         eprintln!("{}", s);
     }

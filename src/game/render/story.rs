@@ -87,19 +87,33 @@ fn render_combat(
     }
 
     let options_list: Vec<(String, &Style)> = create_options_list(focused, &options.as_slice());
+    // Render a red border if navigation is not free
+    let list_border_style = {
+        match scene.story.has_free_nav() {
+            true => Style::default().fg(Color::Black),
+            false => Style::default().fg(Color::Red),
+        }
+    };
 
     // Split in three vertically
     Group::default()
         .direction(Direction::Vertical)
         .margin(2)
-        .sizes(&[Size::Percent(34), Size::Percent(33), Size::Percent(33)])
+        .sizes(&[Size::Percent(20), Size::Percent(50), Size::Percent(30)])
         .render(t, area, |t, chunks| {
             // 1st: status
-            Block::default().title(&title).render(t, &chunks[0]);
+            Block::default()
+                .title(&title.to_sentence_case())
+                .render(t, &chunks[0]);
             // 2nd: paragraph
             Paragraph::default().text(&paragraph).render(t, &chunks[1]);
             // 3rd: options
             List::default()
+                .block(
+                    Block::default()
+                        .borders(border::ALL)
+                        .border_style(list_border_style),
+                )
                 .items(&options_list.as_slice())
                 .render(t, &chunks[2]);
         });
